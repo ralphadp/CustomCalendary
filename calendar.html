@@ -7,20 +7,56 @@
 <body>
 
 <label for="start-date">Start Date:</label><input id="start-date" type="date" placeholder="MM/DD/YYYY" maxlength="10" value="8/15/2008"/><br/>
-<label for="number-days">Number of days: </label><input id="number-days" pattern="[0-99]" min="1" step="1" maxlength="3" required  value="17"/><br/>
+<label for="number-days">Number of days: </label><input id="number-days" type="number" min="1" step="1" maxlength="3" required value="17"/><br/>
 <label for="country">Country Code: </label><input id="country" pattern="[a-zA-Z]+" maxlength="2" required value="US"/><br/>
 <button id="render" onclick="(new CustomCalendar).renderCalendar();">Render</button>
 
+<br><hr>
+
+<table>
+    <tr><th>S</th><th>M</th><th>T</th><th>W</th><th>T</th><th>F</th><th>S</th></tr>
+    <tr><td id="c0"></td><td id="c1"></td><td id="c2"></td><td id="c3"></td><td id="c4"></td><td id="c5"></td><td id="c6"></td></tr>
+    <tr><td id="c7"></td><td id="c8"></td><td id="c9"></td><td id="c10"></td><td id="c11"></td><td id="c12"></td><td id="c13"></td></tr>
+    <tr><td id="c14"></td><td id="c15"></td><td id="c16"></td><td id="c17"></td><td id="c18"></td><td id="c19"></td><td id="c20"></td></tr>
+    <tr><td id="c21"></td><td id="c22"></td><td id="c23"></td><td id="c24"></td><td id="c25"></td><td id="c26"></td><td id="c27"></td></tr>
+    <tr><td id="c28"></td><td id="c29"></td><td id="c30"></td><td id="c31"></td><td id="c32"></td><td id="c33"></td><td id="c34"></td></tr>
+    <tr><td id="c35"></td><td id="c36"></td><td id="c37"></td><td id="c38"></td><td id="c39"></td><td id="c40"></td><td id="c41"></td></tr>
+</table>
 <script>
 
     let CustomCalendar = function () {
         this.start = document.getElementById("start-date").value;
-        this.number = document.getElementById("number-days").value;
+        this.number = Number(document.getElementById("number-days").value);
         this.country = document.getElementById("country").value;
     };
 
     CustomCalendar.prototype.renderCalendar = function() {
-        alert("rendering... with: "+this.start+", "+this.number+", "+this.number);
+
+        let date = new Date(this.start);
+        console.log(date);
+        console.log(st = date.toDateString().split(' '));
+//        let previous = new Date(date.getFullYear(), date.getMonth(), -1);
+        let first = new Date(date.getFullYear(), date.getMonth(), Number(st[2]));
+//        let last = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+        //console.log(inip = previous.toDateString().split(' '));
+        console.log(ini = first.toDateString().split(' '));
+        //console.log(last = last.toDateString().split(' '));
+
+        let data_demo = {Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6};
+        let day = data_demo[ini[0]];
+        let index = Number(st[2]) - day;
+        console.log(index);
+        let tableIndex = 0;
+        console.log(index + this.number + day);
+        for (let dayIndex = index; dayIndex < index + this.number + day; dayIndex++) {
+            let actual_date = new Date(date.getFullYear(), date.getMonth(), dayIndex);
+            if (actual_date.getMonth() !== date.getMonth()) {
+                console.log("create new calendar " +actual_date.getMonth()+ " previous was " + date.getMonth());
+            }
+            let info = actual_date.toDateString().split(' ');
+            document.getElementById("c" + tableIndex++).innerHTML = Number(info[2]);
+        }
     };
 
     CustomCalendar.prototype.isDate = function(date) {
