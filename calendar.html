@@ -12,16 +12,8 @@
 <button id="render" onclick="(new CustomCalendar).renderCalendar();">Render</button>
 
 <br><hr>
-
-<table>
-    <tr><th>S</th><th>M</th><th>T</th><th>W</th><th>T</th><th>F</th><th>S</th></tr>
-    <tr><td id="c0"></td><td id="c1"></td><td id="c2"></td><td id="c3"></td><td id="c4"></td><td id="c5"></td><td id="c6"></td></tr>
-    <tr><td id="c7"></td><td id="c8"></td><td id="c9"></td><td id="c10"></td><td id="c11"></td><td id="c12"></td><td id="c13"></td></tr>
-    <tr><td id="c14"></td><td id="c15"></td><td id="c16"></td><td id="c17"></td><td id="c18"></td><td id="c19"></td><td id="c20"></td></tr>
-    <tr><td id="c21"></td><td id="c22"></td><td id="c23"></td><td id="c24"></td><td id="c25"></td><td id="c26"></td><td id="c27"></td></tr>
-    <tr><td id="c28"></td><td id="c29"></td><td id="c30"></td><td id="c31"></td><td id="c32"></td><td id="c33"></td><td id="c34"></td></tr>
-    <tr><td id="c35"></td><td id="c36"></td><td id="c37"></td><td id="c38"></td><td id="c39"></td><td id="c40"></td><td id="c41"></td></tr>
-</table>
+<div id="calendars">
+</div>
 <script>
 
     let CustomCalendar = function () {
@@ -34,28 +26,57 @@
 
         let date = new Date(this.start);
         console.log(date);
-        console.log(st = date.toDateString().split(' '));
-//        let previous = new Date(date.getFullYear(), date.getMonth(), -1);
-        let first = new Date(date.getFullYear(), date.getMonth(), Number(st[2]));
-//        let last = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+        console.log(startArray = date.toDateString().split(' '));
 
-        //console.log(inip = previous.toDateString().split(' '));
-        console.log(ini = first.toDateString().split(' '));
-        //console.log(last = last.toDateString().split(' '));
+        let first = new Date(date.getFullYear(), date.getMonth(), Number(startArray[2]));
+        console.log(dateArray = first.toDateString().split(' '));
 
         let data_demo = {Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6};
-        let day = data_demo[ini[0]];
-        let index = Number(st[2]) - day;
+        let day = data_demo[dateArray[0]];
+        let index = Number(startArray[2]) - day;
         console.log(index);
-        let tableIndex = 0;
-        console.log(index + this.number + day);
+        let pos = {row: 0, column: 0};
+        let previous = date.getMonth();
+        this.generateTable(previous);
         for (let dayIndex = index; dayIndex < index + this.number + day; dayIndex++) {
             let actual_date = new Date(date.getFullYear(), date.getMonth(), dayIndex);
-            if (actual_date.getMonth() !== date.getMonth()) {
-                console.log("create new calendar " +actual_date.getMonth()+ " previous was " + date.getMonth());
+            let actual = actual_date.getMonth();
+            if (actual !== previous) {
+                console.log("create new calendar " +actual+ " previous was " + previous);
+                this.generateTable(actual);
+                actualArray = actual_date.toDateString().split(' ');
+                previous = actual;
+                pos.row = 0;
             }
             let info = actual_date.toDateString().split(' ');
-            document.getElementById("c" + tableIndex++).innerHTML = Number(info[2]);
+            this.addTableItem(actual, pos, Number(info[2]));
+        }
+    };
+
+    CustomCalendar.prototype.generateTable = function(id) {
+        let table = document.createElement("table");
+        let tbody = document.createElement("tbody");
+        table.setAttribute("id", 't' + id);
+        table.appendChild(tbody);
+        tbody.innerHTML = "<tr><th>S</th><th>M</th><th>T</th><th>W</th><th>T</th><th>F</th><th>S</th></tr>" +
+        "<tr class='r0'><td class='c0'></td><td class='c1'></td><td class='c2'></td><td class='c3'></td><td class='c4'></td><td class='c5'></td><td class='c6'></td></tr>"+
+        "<tr class='r1'><td class='c0'></td><td class='c1'></td><td class='c2'></td><td class='c3'></td><td class='c4'></td><td class='c5'></td><td class='c6'></td></tr>"+
+        "<tr class='r2'><td class='c0'></td><td class='c1'></td><td class='c2'></td><td class='c3'></td><td class='c4'></td><td class='c5'></td><td class='c6'></td></tr>"+
+        "<tr class='r3'><td class='c0'></td><td class='c1'></td><td class='c2'></td><td class='c3'></td><td class='c4'></td><td class='c5'></td><td class='c6'></td></tr>"+
+        "<tr class='r4'><td class='c0'></td><td class='c1'></td><td class='c2'></td><td class='c3'></td><td class='c4'></td><td class='c5'></td><td class='c6'></td></tr>"+
+        "<tr class='r5'><td class='c0'></td><td class='c1'></td><td class='c2'></td><td class='c3'></td><td class='c4'></td><td class='c5'></td><td class='c6'></td></tr>";
+        document.getElementById('calendars').appendChild(table);
+    };
+
+    CustomCalendar.prototype.addTableItem = function(tableId, pos, day) {
+        let table = document.getElementById('t' + tableId);
+        let tableRow = table.getElementsByClassName('r' + pos.row)[0];
+        let data = tableRow.getElementsByClassName('c' + pos.column)[0];
+        data.innerHTML = day;
+        pos.column++;
+        if (pos.column === 7) {
+            pos.row++;
+            pos.column = 0;
         }
     };
 
@@ -68,6 +89,7 @@
     };
 
     CustomCalendar.prototype.isCountryCode = function(code) {
+        //referenced from https://gist.github.com/maephisto/9228207
         var isoCodes = {
             'AF' : 'Afghanistan',
             'AX' : 'Aland Islands',
