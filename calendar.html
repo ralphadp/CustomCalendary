@@ -15,21 +15,162 @@
             padding-bottom: 1px;
             text-align: center;
         }
+
+        /*Referenced in http://www.cssscript.com/pure-css3-animated-text-overlay-on-hover/ */
+        .overbox {
+            position: absolute;
+        }
+        .box .overtext {
+            background: white;
+            color: black;
+            -webkit-transition: all 300ms ease-out;
+            -moz-transition: all 300ms ease-out;
+            -o-transition: all 300ms ease-out;
+            -ms-transition: all 300ms ease-out;
+            transition: all 300ms ease-out;
+            transform: translateY(40px);
+            -webkit-transform: translateY(40px);
+        }
+        .box .tagline {
+            font-size: 0.8em;
+            opacity: 0;
+            transition-delay: 0.2s;
+            transition-duration: 0.2s;
+        }
+        .box:hover .tagline,
+        .box:focus .tagline {
+            opacity: 1;
+            transform: translateX(0px);
+            -webkit-transform: translateX(0px);
+        }
     </style>
 </head>
+<script>
+    //Supported Countries from https://holidayapi.com/
+    var isoCodes = {
+        'AR': 'Argentina',
+        'AO': 'Angola',
+        'AT': 'Austria',
+        'AU': 'Australia',
+        'AW': 'Aruba',
+        'AX': 'Åland Islands',
+        'BA': 'Bosnia and Herzegovina',
+        'BE': 'Belgium',
+        'BG': 'Bulgaria',
+        'BO': 'Bolivia',
+        'BR': 'Brazil',
+        'BS': 'The Bahamas',
+        'CA': 'Canada',
+        'CH': 'Switzerland',
+        'CN': 'China',
+        'CO': 'Colombia',
+        'CR': 'Costa Rica',
+        'CU': 'Cuba',
+        'CZ': 'Czech Republic',
+        'DE': 'Germany',
+        'DK': 'Denmark',
+        'DO': 'Dominican Republic',
+        'EC': 'Ecuador',
+        'ES': 'Spain',
+        'FI': 'Finland',
+        'FR': 'France',
+        'GB': 'United Kingdom',
+        'GB-ENG': 'England',
+        'GB-NIR': 'Northern Ireland',
+        'GB-SCT': 'Scotland',
+        'GB-WLS': 'Wales',
+        'GR': 'Greece',
+        'GT': 'Guatemala',
+        'HK': 'Hong Kong',
+        'HN': 'Honduras',
+        'HR': 'Croatia',
+        'HU': 'Hungary',
+        'ID': 'Indonesia',
+        'IE': 'Ireland',
+        'IN': 'India',
+        'IL': 'Israel',
+        'IS': 'Iceland',
+        'IT': 'Italy',
+        'JP': 'Japan',
+        'KZ': 'Kazakhstan',
+        'LS': 'Lesotho',
+        'LU': 'Luxembourg',
+        'MG': 'Madagascar',
+        'MQ': 'Martinique',
+        'MT': 'Malta',
+        'MU': 'Mauritius',
+        'MX': 'Mexico',
+        'MZ': 'Mozambique',
+        'NG': 'Nigeria',
+        'NL': 'Netherlands',
+        'NO': 'Norway',
+        'PE': 'Peru',
+        'PK': 'Pakistan',
+        'PH': 'Philippines',
+        'PL': 'Poland',
+        'PR': 'Puerto Rico',
+        'PT': 'Portugal',
+        'PY': 'Paraguay',
+        'RE': 'Réunion',
+        'RO': 'Romania',
+        'RU': 'Russia',
+        'SC': 'Seychelles',
+        'SE': 'Sweden',
+        'SG': 'Singapore',
+        'SI': 'Slovenia',
+        'ST': 'Sao Tome and Principe',
+        'SK': 'Slovakia',
+        'TN': 'Tunisia',
+        'TR': 'Turkey',
+        'UA': 'Ukraine',
+        'US': 'United States',
+        'UY': 'Uruguay',
+        'VE': 'Venezuela',
+        'ZA': 'South Africa',
+        'ZW': 'Zimbabwe'
+    };
+
+    function createComboCodes() {
+        let container = document.getElementById("country-container");
+        let selectElement = document.createElement("select");
+        selectElement.setAttribute("id", 'country');
+
+        for (let code in isoCodes) {
+            let optionElement = document.createElement("option");
+            optionElement.setAttribute("value", code);
+            if (code === "US") {
+                optionElement.setAttribute("selected", "selected");
+            }
+            optionElement.innerHTML = isoCodes[code];
+            selectElement.appendChild(optionElement);
+        }
+        container.appendChild(selectElement);
+    }
+</script>
+
 <body>
 
 <label for="start-date">Start Date:</label><input id="start-date" type="date" placeholder="MM/DD/YYYY" maxlength="10" value="8/15/2008"/><br/>
 <label for="number-days">Number of days: </label><input id="number-days" type="number" min="1" step="1" maxlength="3" required value="17"/><br/>
-<label for="country">Country Code: </label><input id="country" pattern="[a-zA-Z]+" maxlength="2" required value="US"/><br/>
+<label for="country-container">Country Code: </label><span id="country-container"></span><br/>
 <button id="render" onclick="(new CustomCalendar).renderCalendar();">Render</button>
 
 <br><hr>
-<div id="calendars">
+<div id="container">
+    <div id="calendars-container">
+    </div>
 </div>
+
+
+<!--<div class="box">-->
+<!--<div class='overbox'><div class='tagline overtext'> Tagline is </div></div>-->
+<!--</div>-->
 <script>
+    createComboCodes();
 
     let CustomCalendar = function () {
+        //Test API key
+        this.key = "e4ffcf73-a0bd-4664-8267-841da2b0ab41";
         //default values
         this.start = "8/15/2008";
         this.number = 17;
@@ -43,43 +184,49 @@
         if (this.isNumber(number)) {
             this.number = Number(number);
         }
-        let code = document.getElementById("country").value;
-        if (this.isCountryCode(code)) {
-            this.country = code;
-        }
+        this.country = document.getElementById("country").value;
+    };
+
+    CustomCalendar.prototype.clear = function() {
+        let elements = document.getElementById("calendars-container");
+        elements.parentNode.removeChild(elements);
+
+        let div = document.createElement("div");
+        div.setAttribute("id", 'calendars-container');
+        document.getElementById("container").appendChild(div);
     };
 
     CustomCalendar.prototype.renderCalendar = function() {
+        this.clear();
 
         let date = new Date(this.start);
-        console.log(date);
-        console.log(startArray = date.toDateString().split(' '));
+        let startArray = date.toDateString().split(' ');
+        this.holidays = this.getCountryHolidays(date);
 
         let first = new Date(date.getFullYear(), date.getMonth(), Number(startArray[2]));
-        console.log(dateArray = first.toDateString().split(' '));
+        let dateArray = first.toDateString().split(' ');
 
         let data_demo = {Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6};
         let day = data_demo[dateArray[0]];
         let index = Number(startArray[2]) - day;
         this.initialDay = Number(startArray[2]);
-        console.log(index);
+
         let pos = {row: 0, column: 0};
         let previous = date.getMonth();
-        this.generateTable(previous, dateArray);
+        this.generateTable(previous, dateArray, true);
         for (let dayIndex = index; dayIndex < index + this.number + day; dayIndex++) {
             let actual_date = new Date(date.getFullYear(), date.getMonth(), dayIndex);
             let actual = actual_date.getMonth();
             if (actual !== previous) {
-                console.log("create new calendar " +actual+ " previous was " + previous);
                 actualArray = actual_date.toDateString().split(' ');
                 this.endTable(previous, pos);
-                this.generateTable(actual, actualArray);
+                this.generateTable(actual, actualArray, false);
                 this.initTable(actual, pos);
                 previous = actual;
                 pos.row = 0;
             }
             let info = actual_date.toDateString().split(' ');
-            this.addTableItem(actual, pos, Number(info[2]));
+            this.addTableItem(actual, pos, info);
         }
         this.endTable(previous, pos);
     };
@@ -102,23 +249,27 @@
         return month[array[1]] + " " + array[3];
     };
 
-    CustomCalendar.prototype.generateTable = function(id, array) {
+    CustomCalendar.prototype.generateTable = function(id, array, headerRow) {
         let table = document.createElement("table");
         let tbody = document.createElement("tbody");
         table.setAttribute("id", 't' + id);
+        table.setAttribute("class", 'calendar');
         table.appendChild(tbody);
-        tbody.innerHTML = "<tr><th>S</th><th>M</th><th>T</th><th>W</th><th>T</th><th>F</th><th>S</th></tr>" +
-        "<tr><td colspan='7' class='calendar-header'>" + this.generateTitle(array) + "</td></tr>"+
+        if (headerRow) {
+            tbody.innerHTML = "<tr><th>S</th><th>M</th><th>T</th><th>W</th><th>T</th><th>F</th><th>S</th></tr>";
+        }
+        tbody.innerHTML += "<tr><td colspan='7' class='calendar-header'>" + this.generateTitle(array) + "</td></tr>" +
         "<tr class='r0'><td class='c0'></td><td class='c1'></td><td class='c2'></td><td class='c3'></td><td class='c4'></td><td class='c5'></td><td class='c6'></td></tr>"+
         "<tr class='r1'><td class='c0'></td><td class='c1'></td><td class='c2'></td><td class='c3'></td><td class='c4'></td><td class='c5'></td><td class='c6'></td></tr>"+
         "<tr class='r2'><td class='c0'></td><td class='c1'></td><td class='c2'></td><td class='c3'></td><td class='c4'></td><td class='c5'></td><td class='c6'></td></tr>"+
         "<tr class='r3'><td class='c0'></td><td class='c1'></td><td class='c2'></td><td class='c3'></td><td class='c4'></td><td class='c5'></td><td class='c6'></td></tr>"+
         "<tr class='r4'><td class='c0'></td><td class='c1'></td><td class='c2'></td><td class='c3'></td><td class='c4'></td><td class='c5'></td><td class='c6'></td></tr>"+
         "<tr class='r5'><td class='c0'></td><td class='c1'></td><td class='c2'></td><td class='c3'></td><td class='c4'></td><td class='c5'></td><td class='c6'></td></tr>";
-        document.getElementById('calendars').appendChild(table);
+        document.getElementById('calendars-container').appendChild(table);
     };
 
-    CustomCalendar.prototype.addTableItem = function(tableId, pos, day) {
+    CustomCalendar.prototype.addTableItem = function(tableId, pos, info) {
+        let day = Number(info[2]);
         let table = document.getElementById('t' + tableId);
         let tableRow = table.getElementsByClassName('r' + pos.row)[0];
         let data = tableRow.getElementsByClassName('c' + pos.column)[0];
@@ -134,6 +285,12 @@
                 data.style.color = "black";
             }
             data.innerHTML = day;
+            let keyHoliday = this.convertHolidayAPIDate(info[3], tableId + 1, day);
+            if (this.holidays[keyHoliday] !== undefined) {
+                data.style.background = "#FA7A10";
+                data.className += " box";
+                data.innerHTML =  day +"<div class='overbox'><div class='tagline overtext'>" + this.holidays[keyHoliday] + "</div></div>";
+            }
         } else {
             data.style.background = "#CCCCCC";
             data.style.color = "#CCCCCC";
@@ -172,6 +329,41 @@
         }
     };
 
+    CustomCalendar.prototype.get = function(url) {
+        var xmlHttp = new XMLHttpRequest();
+//        xmlHttp.onreadystatechange = function() {
+//            if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+//                callback(xmlHttp.responseText);
+//        };
+        xmlHttp.open("GET", url, false);
+        xmlHttp.send(null);
+        return xmlHttp.responseText;
+    };
+
+    CustomCalendar.prototype.convertHolidayAPIDate = function(year, month, day) {
+        if (month < 10){
+            month = '0' + month;
+        }
+        if (day < 10){
+            day = '0' + day;
+        }
+        return year + "-" + month + "-" + day
+    };
+
+    CustomCalendar.prototype.getCountryHolidays = function(date) {
+        let holidaysJson = {};
+        for (let indexMonth = date.getMonth(); indexMonth < 12; indexMonth++) {
+            let holiday = this.get("https://holidayapi.com/v1/holidays?key=" + this.key + "&country=" + this.country + "&year=" + date.getFullYear() + "&month=" + (indexMonth + 1) + "&day=1&upcoming=true&pretty=true");
+            holiday = JSON.parse(holiday);
+            if (holiday !== undefined && holiday.status === 200) {
+                for (let index in holiday.holidays) {
+                    holidaysJson[holiday.holidays[index].date] = holiday.holidays[index].name;
+                }
+            }
+        }
+        return holidaysJson;
+    };
+
     CustomCalendar.prototype.isDate = function(date) {
         return !/^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/(19|20)\d{2}$/.test(date);
     };
@@ -180,257 +372,6 @@
         return !isNaN(number);
     };
 
-    CustomCalendar.prototype.isCountryCode = function(code) {
-        //referenced from https://gist.github.com/maephisto/9228207
-        var isoCodes = {
-            'AF' : 'Afghanistan',
-            'AX' : 'Aland Islands',
-            'AL' : 'Albania',
-            'DZ' : 'Algeria',
-            'AS' : 'American Samoa',
-            'AD' : 'Andorra',
-            'AO' : 'Angola',
-            'AI' : 'Anguilla',
-            'AQ' : 'Antarctica',
-            'AG' : 'Antigua And Barbuda',
-            'AR' : 'Argentina',
-            'AM' : 'Armenia',
-            'AW' : 'Aruba',
-            'AU' : 'Australia',
-            'AT' : 'Austria',
-            'AZ' : 'Azerbaijan',
-            'BS' : 'Bahamas',
-            'BH' : 'Bahrain',
-            'BD' : 'Bangladesh',
-            'BB' : 'Barbados',
-            'BY' : 'Belarus',
-            'BE' : 'Belgium',
-            'BZ' : 'Belize',
-            'BJ' : 'Benin',
-            'BM' : 'Bermuda',
-            'BT' : 'Bhutan',
-            'BO' : 'Bolivia',
-            'BA' : 'Bosnia And Herzegovina',
-            'BW' : 'Botswana',
-            'BV' : 'Bouvet Island',
-            'BR' : 'Brazil',
-            'IO' : 'British Indian Ocean Territory',
-            'BN' : 'Brunei Darussalam',
-            'BG' : 'Bulgaria',
-            'BF' : 'Burkina Faso',
-            'BI' : 'Burundi',
-            'KH' : 'Cambodia',
-            'CM' : 'Cameroon',
-            'CA' : 'Canada',
-            'CV' : 'Cape Verde',
-            'KY' : 'Cayman Islands',
-            'CF' : 'Central African Republic',
-            'TD' : 'Chad',
-            'CL' : 'Chile',
-            'CN' : 'China',
-            'CX' : 'Christmas Island',
-            'CC' : 'Cocos (Keeling) Islands',
-            'CO' : 'Colombia',
-            'KM' : 'Comoros',
-            'CG' : 'Congo',
-            'CD' : 'Congo, Democratic Republic',
-            'CK' : 'Cook Islands',
-            'CR' : 'Costa Rica',
-            'CI' : 'Cote D\'Ivoire',
-            'HR' : 'Croatia',
-            'CU' : 'Cuba',
-            'CY' : 'Cyprus',
-            'CZ' : 'Czech Republic',
-            'DK' : 'Denmark',
-            'DJ' : 'Djibouti',
-            'DM' : 'Dominica',
-            'DO' : 'Dominican Republic',
-            'EC' : 'Ecuador',
-            'EG' : 'Egypt',
-            'SV' : 'El Salvador',
-            'GQ' : 'Equatorial Guinea',
-            'ER' : 'Eritrea',
-            'EE' : 'Estonia',
-            'ET' : 'Ethiopia',
-            'FK' : 'Falkland Islands (Malvinas)',
-            'FO' : 'Faroe Islands',
-            'FJ' : 'Fiji',
-            'FI' : 'Finland',
-            'FR' : 'France',
-            'GF' : 'French Guiana',
-            'PF' : 'French Polynesia',
-            'TF' : 'French Southern Territories',
-            'GA' : 'Gabon',
-            'GM' : 'Gambia',
-            'GE' : 'Georgia',
-            'DE' : 'Germany',
-            'GH' : 'Ghana',
-            'GI' : 'Gibraltar',
-            'GR' : 'Greece',
-            'GL' : 'Greenland',
-            'GD' : 'Grenada',
-            'GP' : 'Guadeloupe',
-            'GU' : 'Guam',
-            'GT' : 'Guatemala',
-            'GG' : 'Guernsey',
-            'GN' : 'Guinea',
-            'GW' : 'Guinea-Bissau',
-            'GY' : 'Guyana',
-            'HT' : 'Haiti',
-            'HM' : 'Heard Island & Mcdonald Islands',
-            'VA' : 'Holy See (Vatican City State)',
-            'HN' : 'Honduras',
-            'HK' : 'Hong Kong',
-            'HU' : 'Hungary',
-            'IS' : 'Iceland',
-            'IN' : 'India',
-            'ID' : 'Indonesia',
-            'IR' : 'Iran, Islamic Republic Of',
-            'IQ' : 'Iraq',
-            'IE' : 'Ireland',
-            'IM' : 'Isle Of Man',
-            'IL' : 'Israel',
-            'IT' : 'Italy',
-            'JM' : 'Jamaica',
-            'JP' : 'Japan',
-            'JE' : 'Jersey',
-            'JO' : 'Jordan',
-            'KZ' : 'Kazakhstan',
-            'KE' : 'Kenya',
-            'KI' : 'Kiribati',
-            'KR' : 'Korea',
-            'KW' : 'Kuwait',
-            'KG' : 'Kyrgyzstan',
-            'LA' : 'Lao People\'s Democratic Republic',
-            'LV' : 'Latvia',
-            'LB' : 'Lebanon',
-            'LS' : 'Lesotho',
-            'LR' : 'Liberia',
-            'LY' : 'Libyan Arab Jamahiriya',
-            'LI' : 'Liechtenstein',
-            'LT' : 'Lithuania',
-            'LU' : 'Luxembourg',
-            'MO' : 'Macao',
-            'MK' : 'Macedonia',
-            'MG' : 'Madagascar',
-            'MW' : 'Malawi',
-            'MY' : 'Malaysia',
-            'MV' : 'Maldives',
-            'ML' : 'Mali',
-            'MT' : 'Malta',
-            'MH' : 'Marshall Islands',
-            'MQ' : 'Martinique',
-            'MR' : 'Mauritania',
-            'MU' : 'Mauritius',
-            'YT' : 'Mayotte',
-            'MX' : 'Mexico',
-            'FM' : 'Micronesia, Federated States Of',
-            'MD' : 'Moldova',
-            'MC' : 'Monaco',
-            'MN' : 'Mongolia',
-            'ME' : 'Montenegro',
-            'MS' : 'Montserrat',
-            'MA' : 'Morocco',
-            'MZ' : 'Mozambique',
-            'MM' : 'Myanmar',
-            'NA' : 'Namibia',
-            'NR' : 'Nauru',
-            'NP' : 'Nepal',
-            'NL' : 'Netherlands',
-            'AN' : 'Netherlands Antilles',
-            'NC' : 'New Caledonia',
-            'NZ' : 'New Zealand',
-            'NI' : 'Nicaragua',
-            'NE' : 'Niger',
-            'NG' : 'Nigeria',
-            'NU' : 'Niue',
-            'NF' : 'Norfolk Island',
-            'MP' : 'Northern Mariana Islands',
-            'NO' : 'Norway',
-            'OM' : 'Oman',
-            'PK' : 'Pakistan',
-            'PW' : 'Palau',
-            'PS' : 'Palestinian Territory, Occupied',
-            'PA' : 'Panama',
-            'PG' : 'Papua New Guinea',
-            'PY' : 'Paraguay',
-            'PE' : 'Peru',
-            'PH' : 'Philippines',
-            'PN' : 'Pitcairn',
-            'PL' : 'Poland',
-            'PT' : 'Portugal',
-            'PR' : 'Puerto Rico',
-            'QA' : 'Qatar',
-            'RE' : 'Reunion',
-            'RO' : 'Romania',
-            'RU' : 'Russian Federation',
-            'RW' : 'Rwanda',
-            'BL' : 'Saint Barthelemy',
-            'SH' : 'Saint Helena',
-            'KN' : 'Saint Kitts And Nevis',
-            'LC' : 'Saint Lucia',
-            'MF' : 'Saint Martin',
-            'PM' : 'Saint Pierre And Miquelon',
-            'VC' : 'Saint Vincent And Grenadines',
-            'WS' : 'Samoa',
-            'SM' : 'San Marino',
-            'ST' : 'Sao Tome And Principe',
-            'SA' : 'Saudi Arabia',
-            'SN' : 'Senegal',
-            'RS' : 'Serbia',
-            'SC' : 'Seychelles',
-            'SL' : 'Sierra Leone',
-            'SG' : 'Singapore',
-            'SK' : 'Slovakia',
-            'SI' : 'Slovenia',
-            'SB' : 'Solomon Islands',
-            'SO' : 'Somalia',
-            'ZA' : 'South Africa',
-            'GS' : 'South Georgia And Sandwich Isl.',
-            'ES' : 'Spain',
-            'LK' : 'Sri Lanka',
-            'SD' : 'Sudan',
-            'SR' : 'Suriname',
-            'SJ' : 'Svalbard And Jan Mayen',
-            'SZ' : 'Swaziland',
-            'SE' : 'Sweden',
-            'CH' : 'Switzerland',
-            'SY' : 'Syrian Arab Republic',
-            'TW' : 'Taiwan',
-            'TJ' : 'Tajikistan',
-            'TZ' : 'Tanzania',
-            'TH' : 'Thailand',
-            'TL' : 'Timor-Leste',
-            'TG' : 'Togo',
-            'TK' : 'Tokelau',
-            'TO' : 'Tonga',
-            'TT' : 'Trinidad And Tobago',
-            'TN' : 'Tunisia',
-            'TR' : 'Turkey',
-            'TM' : 'Turkmenistan',
-            'TC' : 'Turks And Caicos Islands',
-            'TV' : 'Tuvalu',
-            'UG' : 'Uganda',
-            'UA' : 'Ukraine',
-            'AE' : 'United Arab Emirates',
-            'GB' : 'United Kingdom',
-            'US' : 'United States',
-            'UM' : 'United States Outlying Islands',
-            'UY' : 'Uruguay',
-            'UZ' : 'Uzbekistan',
-            'VU' : 'Vanuatu',
-            'VE' : 'Venezuela',
-            'VN' : 'Viet Nam',
-            'VG' : 'Virgin Islands, British',
-            'VI' : 'Virgin Islands, U.S.',
-            'WF' : 'Wallis And Futuna',
-            'EH' : 'Western Sahara',
-            'YE' : 'Yemen',
-            'ZM' : 'Zambia',
-            'ZW' : 'Zimbabwe'
-        };
-        return isoCodes[code] !== undefined;
-    }
 </script>
 </body>
 </html>
