@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Custom Span Calendar</title>
+</head>
+<body>
+
+<label for="start-date">Start Date:</label><input id="start-date" type="date" maxlength="10" value="8/15/2008"/><br/>
+<label for="number-days">Number of days: </label><input id="number-days" maxlength="3" value="17"/><br/>
+<label for="country">Country Code: </label><input id="country" maxlength="2" value="US"/><br/>
+<button id="render" onclick="(new CustomCalendar).renderCalendar();">Render</button>
+
+<script>
+
+    let CustomCalendar = function () {
+        this.start = document.getElementById("start-date").value;
+        this.number = document.getElementById("number-days").value;
+        this.country = document.getElementById("country").value;
+    };
+
+    CustomCalendar.prototype.renderCalendar = function() {
+        alert("rendering... with: "+this.start+", "+this.number+", "+this.number);
+    };
+
+</script>
+</body>
+</html>
