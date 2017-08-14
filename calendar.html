@@ -3,6 +3,19 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>Custom Span Calendar</title>
+    <style>
+        td {
+            padding: 8px;
+            width: 18px;
+        }
+        .calendar-header {
+            background: #ECF7D3;
+            color: black;
+            padding-top: 1px;
+            padding-bottom: 1px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
 
@@ -17,9 +30,23 @@
 <script>
 
     let CustomCalendar = function () {
-        this.start = document.getElementById("start-date").value;
-        this.number = Number(document.getElementById("number-days").value);
-        this.country = document.getElementById("country").value;
+        //default values
+        this.start = "8/15/2008";
+        this.number = 17;
+        this.country = "US";
+        //valeus from user input
+        let date =  document.getElementById("start-date").value;
+        if (this.isDate(date)) {
+            this.start = date;
+        }
+        let number = document.getElementById("number-days").value;
+        if (this.isNumber(number)) {
+            this.number = Number(number);
+        }
+        let code = document.getElementById("country").value;
+        if (this.isCountryCode(code)) {
+            this.country = code;
+        }
     };
 
     CustomCalendar.prototype.renderCalendar = function() {
@@ -34,31 +61,54 @@
         let data_demo = {Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6};
         let day = data_demo[dateArray[0]];
         let index = Number(startArray[2]) - day;
+        this.initialDay = Number(startArray[2]);
         console.log(index);
         let pos = {row: 0, column: 0};
         let previous = date.getMonth();
-        this.generateTable(previous);
+        this.generateTable(previous, dateArray);
         for (let dayIndex = index; dayIndex < index + this.number + day; dayIndex++) {
             let actual_date = new Date(date.getFullYear(), date.getMonth(), dayIndex);
             let actual = actual_date.getMonth();
             if (actual !== previous) {
                 console.log("create new calendar " +actual+ " previous was " + previous);
-                this.generateTable(actual);
                 actualArray = actual_date.toDateString().split(' ');
+                this.endTable(previous, pos);
+                this.generateTable(actual, actualArray);
+                this.initTable(actual, pos);
                 previous = actual;
                 pos.row = 0;
             }
             let info = actual_date.toDateString().split(' ');
             this.addTableItem(actual, pos, Number(info[2]));
         }
+        this.endTable(previous, pos);
     };
 
-    CustomCalendar.prototype.generateTable = function(id) {
+    CustomCalendar.prototype.generateTitle = function(array) {
+        let month = {
+            'Jan': 'January',
+            'Feb': 'February',
+            'Mar': 'March',
+            'Apr': 'April',
+            'May': 'May',
+            'Jun': 'June',
+            'Jul': 'July',
+            'Aug': 'August',
+            'Sep': 'September',
+            'Oct': 'October',
+            'Nov': 'November',
+            'Dec': 'December'
+        };
+        return month[array[1]] + " " + array[3];
+    };
+
+    CustomCalendar.prototype.generateTable = function(id, array) {
         let table = document.createElement("table");
         let tbody = document.createElement("tbody");
         table.setAttribute("id", 't' + id);
         table.appendChild(tbody);
         tbody.innerHTML = "<tr><th>S</th><th>M</th><th>T</th><th>W</th><th>T</th><th>F</th><th>S</th></tr>" +
+        "<tr><td colspan='7' class='calendar-header'>" + this.generateTitle(array) + "</td></tr>"+
         "<tr class='r0'><td class='c0'></td><td class='c1'></td><td class='c2'></td><td class='c3'></td><td class='c4'></td><td class='c5'></td><td class='c6'></td></tr>"+
         "<tr class='r1'><td class='c0'></td><td class='c1'></td><td class='c2'></td><td class='c3'></td><td class='c4'></td><td class='c5'></td><td class='c6'></td></tr>"+
         "<tr class='r2'><td class='c0'></td><td class='c1'></td><td class='c2'></td><td class='c3'></td><td class='c4'></td><td class='c5'></td><td class='c6'></td></tr>"+
@@ -72,11 +122,53 @@
         let table = document.getElementById('t' + tableId);
         let tableRow = table.getElementsByClassName('r' + pos.row)[0];
         let data = tableRow.getElementsByClassName('c' + pos.column)[0];
-        data.innerHTML = day;
+        if (this.initialDay == day) {
+            this.visible = true;
+            this.initialDay = -1;
+        }
+        if (this.visible) {
+            data.style.background = "#C3DAA2";
+            data.style.color = "blue";
+            if (pos.column == 0 || pos.column == 6) {
+                data.style.background = "#FAEF1D";
+                data.style.color = "black";
+            }
+            data.innerHTML = day;
+        } else {
+            data.style.background = "#CCCCCC";
+            data.style.color = "#CCCCCC";
+        }
+
         pos.column++;
+        /*if 7 day is reached, then advance to the next row*/
         if (pos.column === 7) {
             pos.row++;
             pos.column = 0;
+        }
+    };
+
+    CustomCalendar.prototype.initTable = function(tableId, pos) {
+        let table = document.getElementById('t' + tableId);
+        let tableRow = table.getElementsByClassName('r0')[0];
+
+        for(let col = pos.column; col >= 0; col--) {
+            let data = tableRow.getElementsByClassName('c' + col)[0];
+            data.style.background = "#CCCCCC";
+            data.style.color = "#CCCCCC";
+        }
+    };
+
+    CustomCalendar.prototype.endTable = function(tableId, pos) {
+        let table = document.getElementById('t' + tableId);
+        let tableRow = table.getElementsByClassName('r' + pos.row)[0];
+
+        if (pos.column == 0) {
+            return;
+        }
+        for(let col = pos.column; col < 7; col++) {
+            let data = tableRow.getElementsByClassName('c' + col)[0];
+            data.style.background = "#CCCCCC";
+            data.style.color = "#CCCCCC";
         }
     };
 
